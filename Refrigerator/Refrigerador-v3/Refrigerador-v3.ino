@@ -5,7 +5,7 @@
 #include <Wire.h>
 #include <RTC.h>
 
-int timeToDefrost = 5;  // in minutes
+int timeToDefrost = 2;  // in minutes
 int defrostTime   = 60; // in seconds
 int configTemp    = 20; // in centigrados
 

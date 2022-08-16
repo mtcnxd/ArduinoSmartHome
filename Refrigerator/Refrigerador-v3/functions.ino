@@ -67,7 +67,7 @@ void sendPostData()
 
     WiFiClient client;
     HTTPClient http;
-    String urlPost = "http://test.fortech.mx/";
+    String urlPost = "http://test.fortech.mx/wservice/webhook.php";
 
     if (http.begin(client, urlPost)) {
       int httpCode = http.GET();
