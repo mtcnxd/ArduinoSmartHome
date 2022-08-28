@@ -5,14 +5,19 @@
 #include <Wire.h>
 #include <RTC.h>
 
-int timeToDefrost = 2;  // in minutes
-int defrostTime   = 60; // in seconds
-int configTemp    = 20; // in centigrados
+int timeToDefrost = 2;  // minutes
+int defrostTime   = 60; // seconds
+int configTemp    = 20; // centigrados
 
 const char* ssid = "LINKSYS";
 const char* password = "100%smart";
 
+bool ledStatus  = false;
+bool isPushPressed = false;
+
 static int resistor  = 0; // pin D0
+static int pinPush   = 5; // pin D1
+static int pinLed    = 4; // pin D2
 static int compresor = 2; // pin D4
 
 static DS1307 RTC;

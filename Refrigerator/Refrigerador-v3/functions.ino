@@ -1,5 +1,5 @@
 /*
-  Functions to process start here
+  FUNCTIONS BLOCK 
 */
 
 void setupWifiConnection()
@@ -88,7 +88,8 @@ void sendPostData()
   }
 }
 
-bool inArray(int hours, int vector[]) {
+bool inArray(int hours, int vector[]) 
+{
   Serial.println(sizeof(vector));
   for (int i = 0; i <= sizeof(vector); i++) {
     if (hours == vector[i]) {
@@ -96,4 +97,44 @@ bool inArray(int hours, int vector[]) {
     }
   }
   return false;
+}
+
+
+bool pushButtonPressed(bool pushButton)
+{
+  bool buttonPressed = false;
+  if (pushButton) {
+    if (!isPushPressed) {
+      buttonPressed = true;
+    }
+    isPushPressed = true;
+
+  } else {
+    isPushPressed = false;
+  }
+  
+  return buttonPressed;
+}
+
+
+bool toggleOutput(bool pushButton)
+{
+  if (pushButton) {
+    if (!isPushPressed) {
+      if (ledStatus) {
+        ledStatus = false;
+        Serial.println("LED Status: " + (String) ledStatus);
+
+      } else {
+        ledStatus = true;
+        Serial.println("LED Status: " + (String) ledStatus);
+      }
+    }
+    isPushPressed = true;
+
+  } else {
+    isPushPressed = false;
+  }
+
+  return ledStatus;
 }
