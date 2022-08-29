@@ -8,6 +8,7 @@
 int timeToDefrost = 2;  // minutes
 int defrostTime   = 60; // seconds
 int configTemp    = 20; // centigrados
+int counter       = 0;  // Testing only
 
 const char* ssid = "LINKSYS";
 const char* password = "100%smart";
@@ -36,6 +37,12 @@ void setup()
 void loop()
 {
   int runningTime = getRunningTime();
+  bool pushButton = !digitalRead(pinPush);
+  
+  if (pushButtonPressed(pushButton)) {
+    Serial.println("Counter: " + (String) counter);
+    counter += 1;
+  }
 
   if (runningTime == timeToDefrost) {
     sendPostData();
