@@ -1,53 +1,59 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
 #include <Wire.h>
 #include <RTC.h>
 #include "Refrigerator.h";
 
-int systemClock = 0;
-
-static int pinDefrost = 0;
-static int pinCompressor = 2;
-static int pinButton = 3;
-
-bool isPushPressed = false;
+int pinDefrost = 0;
+int pinCompressor = 2;
+int pinButton = 16;
+int runningHours = 0;
 
 unsigned long previousMillis = 0;
 const long interval = 1000;
 
-static DS1307 RTC;
+const char* ssid = "LINKSYS";
+const char* password = "100%smart";
 
 Refrigerator fridge;
+DS1307 RTC;
+ESP8266WiFiMulti WiFiMulti;
 
 void setup()
 {
   pinMode(pinButton, INPUT_PULLUP);
   Serial.begin(9600);
   fridge.begin(pinDefrost, pinCompressor);
+  setupWifiConnection();
+  setRunningTime();
 }
 
 void loop()
 {
-  int sensorValue = analogRead(A0);
-  bool pushButton = digitalRead(pinButton);
   unsigned long currentMillis = millis();
 
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
 
+    bool pushButton = digitalRead(pinButton);
     if (pushButtonPressed(pushButton)) {
       fridge.changeTemperature();
     }
 
-    if (systemClock <= 20) {
-      systemClock += 1;
+    if (runningHours <= 20) {
+      runningHours += 1;
     } else {
-      systemClock = 0;
+      runningHours = 0;
     }
 
-    String fridgeStatus = fridge.run(sensorValue, systemClock);
-    
+    int currentTemperature = analogRead(A0);
+    String fridgeStatus = fridge.run(currentTemperature, runningHours);
+
     Serial.print("Fridge Status: " + fridgeStatus);
-    Serial.print(" Default Temperature: " + (String) fridge.getDefaultTemperature());
-    Serial.println(" Current Temperature: " + (String) sensorValue);
+    Serial.print(" Config Temperature: " + (String) fridge.getConfiguredTemperature());
+    Serial.println(" Current Temperature: " + (String) currentTemperature);
   }
 
 }

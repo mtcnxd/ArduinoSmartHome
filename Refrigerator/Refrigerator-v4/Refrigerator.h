@@ -1,8 +1,7 @@
 class Refrigerator
 {
     int defaultTemperature = 170;
-    int compressorPin = 0;
-    int defrostPin = 2;
+    int compressorPin, defrostPin;
 
   public:
     void begin(int compressorPin, int defrostPin)
@@ -21,7 +20,7 @@ class Refrigerator
     }
 
   public:
-    int getDefaultTemperature()
+    int getConfiguredTemperature()
     {
       return defaultTemperature;
     }
@@ -45,19 +44,20 @@ class Refrigerator
         digitalWrite(defrostPin, HIGH);
       } else {
         digitalWrite(defrostPin, LOW);
+        defrostStatus = false;
       }
     }
 
   public:
-    String run(int currTemperature, int runningTime)
+    String run(int currentTemperature, int runningTime)
     {
-      if (runningTime > 20) {
+      if (runningTime == 6) {
         defrostMode(true);
         return "Defrost";
 
       } else {
         defrostMode(false);
-        return coolingMode(currTemperature);
+        return coolingMode(currentTemperature);
 
       }
     }

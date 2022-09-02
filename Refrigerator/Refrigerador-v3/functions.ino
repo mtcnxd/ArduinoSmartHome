@@ -127,7 +127,6 @@ bool pushButtonPressed(bool pushButton)
     if (!isPushPressed) {
       buttonPressed = true;
     }
-    isPushPressed = true;
 
   } else {
     isPushPressed = false;
