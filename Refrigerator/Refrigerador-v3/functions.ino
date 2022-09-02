@@ -1,12 +1,10 @@
 /*
-  FUNCTIONS BLOCK 
+  FUNCTIONS BLOCKS
 */
 
 void setupWifiConnection()
 {
-  delay(10);
   Serial.println("Connecting to: " + (String) ssid);
-
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -15,7 +13,6 @@ void setupWifiConnection()
   }
 
   randomSeed(micros());
-
   Serial.println("WiFi connected: OK");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
@@ -50,14 +47,28 @@ void makeDefrost()
 
   while (defrost) {
     if (currentTime <= defrostTime) {
-      Serial.println("Making defrost while " + (String) currentTime + " seconds");
-      digitalWrite(resistor, HIGH);
+      Serial.println("Making defrost " + (String) currentTime + " seconds");
+      digitalWrite(resistor, LOW);
+      digitalWrite(compresor, HIGH);
       currentTime++;
       delay(1000);
     } else {
-      digitalWrite(resistor, LOW);
+      digitalWrite(resistor, HIGH);
+      digitalWrite(compresor, LOW);
       defrost = false;
     }
+  }
+}
+
+void cooling(int temperature)
+{
+  if (temperature >= configTemp) {
+    Serial.println("Sensor value: " + (String) temperature );
+    digitalWrite(compresor, LOW);
+
+  } else {
+    digitalWrite(compresor, HIGH);
+    Serial.println("Compresor sleep for ten minutes");
   }
 }
 
@@ -88,7 +99,17 @@ void sendPostData()
   }
 }
 
-bool inArray(int hours, int vector[]) 
+void saveTemperature(int addr, int val)
+{
+  EEPROM.write(addr, val);
+}
+
+byte getTemperature(byte addr)
+{
+  return EEPROM.read(addr);
+}
+
+bool inArray(int hours, int vector[])
 {
   Serial.println(sizeof(vector));
   for (int i = 0; i <= sizeof(vector); i++) {
@@ -98,7 +119,6 @@ bool inArray(int hours, int vector[])
   }
   return false;
 }
-
 
 bool pushButtonPressed(bool pushButton)
 {
@@ -112,7 +132,7 @@ bool pushButtonPressed(bool pushButton)
   } else {
     isPushPressed = false;
   }
-  
+
   return buttonPressed;
 }
 
