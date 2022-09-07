@@ -1,4 +1,4 @@
-#include "definitions.h"
+#include "definitions.h";
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
@@ -12,15 +12,7 @@ ESP8266WiFiMulti WiFiMulti;
 
 void setup()
 {
-  delay(500);
-  pinMode(resistor, OUTPUT);
-  pinMode(compresor, OUTPUT);
-  digitalWrite(resistor, HIGH);
-  digitalWrite(compresor, HIGH);
-  pinMode(pinPush, INPUT_PULLUP);
-  Serial.begin(9600);
-  RTC.begin();
-  EEPROM.begin(512);
+  initialSetup();
   setupWifiConnection();
   setRunningTime();
 }
@@ -46,12 +38,12 @@ void loop()
 
     int runningTime = getRunningTime();
 
-    if (runningTime == timeToDefrost) {
-      sendPostData();
+    if (inArray(runningTime, hoursToDefrost)) {
+      //sendPostData();
       makeDefrost();
 
     } else {
-      digitalWrite(resistor, HIGH);
+      digitalWrite(pinHeater, HIGH);
       int sensorValue = analogRead(A0);
       sensorValue = map(sensorValue, 0, 1024, 10, 30);
       cooling(sensorValue);

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #define SS_PIN 10
-#define RST_PIN A3
+#define RST_PIN A0
 
 #define redLed 9
 #define speaker 8
@@ -17,4 +17,3 @@ int successRead;
 byte storedCard[4];
 byte readCard[4];
 byte masterCard[4];
-

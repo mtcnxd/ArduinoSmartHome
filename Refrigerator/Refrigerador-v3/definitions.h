@@ -1,9 +1,8 @@
 /*
   VARS DEFINITIONS
 */
-
-int timeToDefrost = 1;  // minutes
-int defrostTime   = 60; // seconds
+int hoursToDefrost[] = {6, 12, 18, 23};
+int defrostTime   = 600; // seconds (10 mins)
 int configTemp    = 18; // centigrados
 int temperature   = 15; // Testing only
 
@@ -13,8 +12,8 @@ const char* password = "100%smart";
 bool ledStatus  = false;
 bool isPushPressed = false;
 
-static int resistor  = 0;  // pin D3
-static int compresor = 2;
+static int pinHeater    = 0;  // pin D3
+static int pinCompressor = 2;
 static int pinPush   = 16; // pin D0
 
 unsigned long previousMillis = 0;

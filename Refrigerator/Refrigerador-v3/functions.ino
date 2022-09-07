@@ -2,20 +2,35 @@
   FUNCTIONS BLOCKS
 */
 
+void initialSetup()
+{
+  delay(500);
+  pinMode(pinPush, INPUT_PULLUP);
+  pinMode(pinHeater, OUTPUT);
+  pinMode(pinCompressor, OUTPUT);
+  digitalWrite(pinHeater, HIGH);
+  digitalWrite(pinCompressor, HIGH);
+  Serial.begin(9600);
+  RTC.begin();
+  EEPROM.begin(512);
+}
+
 void setupWifiConnection()
 {
+  int connection = 0;
   Serial.println("Connecting to: " + (String) ssid);
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
+    if (connection > 30) {
+      Serial.println("WiFi connected: ERROR");
+      break;
+    }
+    connection ++;
+    randomSeed(micros());
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
   }
-
-  randomSeed(micros());
-  Serial.println("WiFi connected: OK");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
 }
 
 void setRunningTime()
@@ -48,13 +63,13 @@ void makeDefrost()
   while (defrost) {
     if (currentTime <= defrostTime) {
       Serial.println("Making defrost " + (String) currentTime + " seconds");
-      digitalWrite(resistor, LOW);
-      digitalWrite(compresor, HIGH);
+      digitalWrite(pinHeater, LOW);
+      digitalWrite(pinCompressor, HIGH);
       currentTime++;
       delay(1000);
     } else {
-      digitalWrite(resistor, HIGH);
-      digitalWrite(compresor, LOW);
+      digitalWrite(pinHeater, HIGH);
+      digitalWrite(pinCompressor, LOW);
       defrost = false;
     }
   }
@@ -64,11 +79,11 @@ void cooling(int temperature)
 {
   if (temperature >= configTemp) {
     Serial.println("Sensor value: " + (String) temperature );
-    digitalWrite(compresor, LOW);
+    digitalWrite(pinCompressor, LOW);
 
   } else {
-    digitalWrite(compresor, HIGH);
-    Serial.println("Compresor sleep for ten minutes");
+    digitalWrite(pinCompressor, HIGH);
+    Serial.println("Compressor sleep for ten minutes");
   }
 }
 
@@ -78,7 +93,7 @@ void sendPostData()
 
     WiFiClient client;
     HTTPClient http;
-    String urlPost = "http://test.fortech.mx/wservice/webhook.php";
+    String urlPost = "https://io.adafruit.com/api/v2/webhooks/feed/t1WWe4s8Qxq4BV3d4rFBdqHwKfXR/raw";
 
     if (http.begin(client, urlPost)) {
       int httpCode = http.GET();
@@ -109,11 +124,10 @@ byte getTemperature(byte addr)
   return EEPROM.read(addr);
 }
 
-bool inArray(int hours, int vector[])
+bool inArray(int currentHour, int vector[])
 {
-  Serial.println(sizeof(vector));
   for (int i = 0; i <= sizeof(vector); i++) {
-    if (hours == vector[i]) {
+    if (currentHour == vector[i]) {
       return true;
     }
   }
@@ -133,27 +147,4 @@ bool pushButtonPressed(bool pushButton)
   }
 
   return buttonPressed;
-}
-
-
-bool toggleOutput(bool pushButton)
-{
-  if (pushButton) {
-    if (!isPushPressed) {
-      if (ledStatus) {
-        ledStatus = false;
-        Serial.println("LED Status: " + (String) ledStatus);
-
-      } else {
-        ledStatus = true;
-        Serial.println("LED Status: " + (String) ledStatus);
-      }
-    }
-    isPushPressed = true;
-
-  } else {
-    isPushPressed = false;
-  }
-
-  return ledStatus;
 }

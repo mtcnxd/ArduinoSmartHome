@@ -26,14 +26,31 @@ class Refrigerator
     }
 
   public:
+    int sleepingTimer()
+    {
+      int sleepCounter = true;
+      bool sleepingMode = true;
+
+      while (sleepingMode) {
+        if (sleepCounter < 60 ) {
+          sleepCounter++;
+        } else {
+          sleepCounter = 0;
+          sleepingMode = false;
+        }
+      }
+    }
+
+  public:
     String coolingMode(int currTemperature)
     {
       if (currTemperature > defaultTemperature) {
+        sleepingTimer();
         digitalWrite(compressorPin, HIGH);
-        return "Cooling";
+        return "Waiting 10 minutes";
       } else {
         digitalWrite(compressorPin, LOW);
-        return "Waiting";
+        return "Cooling";
       }
     }
 

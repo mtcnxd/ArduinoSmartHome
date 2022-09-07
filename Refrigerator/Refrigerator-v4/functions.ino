@@ -2,25 +2,6 @@
   FUNCTIONS BLOCKS
 */
 
-void setupWifiConnection()
-{
-  int connection = 0;
-  Serial.println("Connecting to: " + (String) ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    if (connection > 30) {
-      Serial.println("WiFi connected: ERROR");
-      break;
-    }
-    connection ++;
-    Serial.print(".");
-    delay(500);
-  }
-  randomSeed(micros());
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
 void setRunningTime()
 {
   delay(1500);

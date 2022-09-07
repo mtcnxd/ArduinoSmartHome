@@ -1,4 +1,5 @@
-int getID() {
+int getID()
+{
   if ( ! mfrc522.PICC_IsNewCardPresent()) {
     return 0;
   }
@@ -12,7 +13,8 @@ int getID() {
   return true;
 }
 
-void granted () {
+void granted ()
+{
   digitalWrite(redLed, HIGH);
   digitalWrite(relay, HIGH);
   delay(2000);
@@ -21,7 +23,8 @@ void granted () {
   delay(1000);
 }
 
-void denied() {
+void denied()
+{
   digitalWrite(redLed, HIGH);
   delay(100);
   digitalWrite(redLed, LOW);
@@ -32,14 +35,16 @@ void denied() {
   delay(500);
 }
 
-void readID( int number ) {
+void readID( int number )
+{
   int start = (number * 4 ) + 2;
   for ( int i = 0; i < 4; i++ ) {
     storedCard[i] = EEPROM.read(start + i);
   }
 }
 
-void writeID( byte a[] ) {
+void writeID( byte a[] )
+{
   if ( !findID( a ) ) {
     int num = EEPROM.read(0);
     int start = ( num * 4 ) + 6;
@@ -53,10 +58,11 @@ void writeID( byte a[] ) {
   }
 }
 
-void deleteID( byte a[] ) {
-  if ( !findID( a ) ) {
-  }
-  else {
+void deleteID( byte a[] )
+{
+  if (!findID(a)) {
+
+  } else {
     int num = EEPROM.read(0);
     int slot;
     int start;
@@ -77,7 +83,8 @@ void deleteID( byte a[] ) {
   }
 }
 
-boolean checkTwo ( byte a[], byte b[] ) {
+boolean checkTwo(byte a[], byte b[]) 
+{
   if ( a[0] != NULL )
     match = true;
   for ( int k = 0; k < 4; k++ ) {
@@ -92,7 +99,8 @@ boolean checkTwo ( byte a[], byte b[] ) {
   }
 }
 
-int findIDSLOT( byte find[] ) {
+int findIDSLOT(byte find[])
+{
   int count = EEPROM.read(0);
   for ( int i = 1; i <= count; i++ ) {
     readID(i);
@@ -103,7 +111,8 @@ int findIDSLOT( byte find[] ) {
   }
 }
 
-boolean findID( byte find[] ) {
+boolean findID(byte find[]) 
+{
   int count = EEPROM.read(0);
   for ( int i = 1; i <= count; i++ ) {
     readID(i);
@@ -117,14 +126,16 @@ boolean findID( byte find[] ) {
   return false;
 }
 
-boolean isMaster( byte test[] ) {
-  if ( checkTwo( test, masterCard ) )
+boolean isMaster(byte test[]) 
+{
+  if (checkTwo(test, masterCard))
     return true;
   else
     return false;
 }
 
-void readConfirm() {
+void readConfirm() 
+{
   digitalWrite(redLed, LOW);
   delay(200);
   digitalWrite(redLed, HIGH);

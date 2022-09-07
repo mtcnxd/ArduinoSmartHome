@@ -1,4 +1,7 @@
 #include <ESP8266WiFi.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
@@ -14,9 +17,6 @@ int runningHours = 0;
 unsigned long previousMillis = 0;
 const long interval = 1000;
 
-const char* ssid = "LINKSYS";
-const char* password = "100%smart";
-
 Refrigerator fridge;
 DS1307 RTC;
 ESP8266WiFiMulti WiFiMulti;
@@ -25,8 +25,9 @@ void setup()
 {
   pinMode(pinButton, INPUT_PULLUP);
   Serial.begin(9600);
+  WiFiManager wifiManager;
+  wifiManager.autoConnect("LGFreeze");
   fridge.begin(pinDefrost, pinCompressor);
-  setupWifiConnection();
   setRunningTime();
 }
 
