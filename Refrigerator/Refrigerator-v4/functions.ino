@@ -11,15 +11,22 @@ void setRunningTime()
   RTC.startClock();
 }
 
-int getRunningTime()
+void showRunningTime()
 {
-  Serial.print("Running time: ");
   Serial.print(RTC.getHours());
   Serial.print(":");
   Serial.print(RTC.getMinutes());
   Serial.print(":");
-  Serial.print(RTC.getSeconds());
-  Serial.println();
+  Serial.println(RTC.getSeconds());
+}
+
+int getRunningHours()
+{
+  return RTC.getHours();
+}
+
+int getRunningMinutes()
+{
   return RTC.getMinutes();
 }
 
@@ -27,7 +34,7 @@ bool pushButtonPressed(bool pushButton)
 {
   bool isPushPressed = false;
   bool buttonPressed = false;
-  
+
   if (pushButton && !isPushPressed) {
     buttonPressed = true;
   } else {
@@ -35,4 +42,21 @@ bool pushButtonPressed(bool pushButton)
   }
 
   return buttonPressed;
+}
+
+void reconnect()
+{
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection: ");
+    Serial.println(mqttServer);
+
+    if (client.connect(mqttClientId.c_str(), mqttUser, mqttPassword)) {
+      Serial.println("connected to server");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      delay(5000);
+    }
+  }
 }

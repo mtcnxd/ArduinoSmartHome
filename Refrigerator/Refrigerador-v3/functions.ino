@@ -15,43 +15,23 @@ void initialSetup()
   EEPROM.begin(512);
 }
 
-void setupWifiConnection()
-{
-  int connection = 0;
-  Serial.println("Connecting to: " + (String) ssid);
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    if (connection > 30) {
-      Serial.println("WiFi connected: ERROR");
-      break;
-    }
-    connection ++;
-    randomSeed(micros());
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-  }
-}
-
 void setRunningTime()
 {
   delay(1500);
   Serial.println("Setting Time");
   RTC.setHourMode(CLOCK_H24);
-  RTC.setDateTime("01-01-2022", "00:00:00");
+  RTC.setDateTime("01-01-2023", "00:00:00");
   Serial.println("New Time Set");
   RTC.startClock();
 }
 
-int getRunningTime()
+int getRunningHours()
 {
-  Serial.print("Running time: ");
-  Serial.print(RTC.getHours());
-  Serial.print(":");
-  Serial.print(RTC.getMinutes());
-  Serial.print(":");
-  Serial.print(RTC.getSeconds());
-  Serial.println();
+  return RTC.getHours();
+}
+
+int getRunningMinutes()
+{
   return RTC.getMinutes();
 }
 
@@ -60,68 +40,51 @@ void makeDefrost()
   bool defrost = true;
   int currentTime = 0;
 
-  while (defrost) {
-    if (currentTime <= defrostTime) {
+  if (currentTime <= defrostTime) {
+    while (defrost) {
       Serial.println("Making defrost " + (String) currentTime + " seconds");
       digitalWrite(pinHeater, LOW);
       digitalWrite(pinCompressor, HIGH);
-      currentTime++;
       delay(1000);
-    } else {
-      digitalWrite(pinHeater, HIGH);
-      digitalWrite(pinCompressor, LOW);
-      defrost = false;
+      currentTime++;
     }
+    defrost = false;
+
+  } else {
+    digitalWrite(pinHeater, HIGH);
+    digitalWrite(pinCompressor, LOW);
   }
+
 }
 
 void cooling(int temperature)
 {
+  Serial.println("Current temperature: " + (String) temperature);
+
   if (temperature >= configTemp) {
-    Serial.println("Sensor value: " + (String) temperature );
     digitalWrite(pinCompressor, LOW);
 
   } else {
-    digitalWrite(pinCompressor, HIGH);
-    Serial.println("Compressor sleep for ten minutes");
-  }
-}
+    bool waiting = true;
+    int counter = 0;
 
-void sendPostData()
-{
-  if ((WiFiMulti.run() == WL_CONNECTED)) {
-
-    WiFiClient client;
-    HTTPClient http;
-    String urlPost = "https://io.adafruit.com/api/v2/webhooks/feed/t1WWe4s8Qxq4BV3d4rFBdqHwKfXR/raw";
-
-    if (http.begin(client, urlPost)) {
-      int httpCode = http.GET();
-
-      if (httpCode > 0) {
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          String payload = http.getString();
-          Serial.println(payload);
-        }
+    while (waiting) {
+      digitalWrite(pinCompressor, HIGH);
+      if (counter < 600) {
+        Serial.println("Turn off compressor: " + (String) counter);
+        counter++;
+        delay(1000);
       } else {
-        Serial.printf("failed, error: %s\n", http.errorToString(httpCode).c_str());
+        waiting = false;
       }
-
-      http.end();
-    } else {
-      Serial.printf("Unable to connect\n");
     }
   }
+  
 }
 
 void saveTemperature(int addr, int val)
 {
   EEPROM.write(addr, val);
-}
-
-byte getTemperature(byte addr)
-{
-  return EEPROM.read(addr);
 }
 
 bool inArray(int currentHour, int vector[])
@@ -147,4 +110,21 @@ bool pushButtonPressed(bool pushButton)
   }
 
   return buttonPressed;
+}
+
+void reconnect()
+{
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection: ");
+    Serial.println(mqttServer);
+
+    if (client.connect(mqttClientId.c_str(), mqttUser, mqttPassword)) {
+      Serial.println("connected to server");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      delay(5000);
+    }
+  }
 }
