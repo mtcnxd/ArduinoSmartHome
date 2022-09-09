@@ -34,23 +34,12 @@ int getRunningMinutes()
 
 void makeDefrost()
 {
-  bool defrost = true;
-  int waitingTimer = 0;
   client.publish("mtcnxd/feeds/fridge_status", "Start defrost");
-
-  while (defrost) {
-    if (waitingTimer <= sleepTime) {
-      Serial.println("Defrosting for: " + (String) waitingTimer + " seconds");
-      digitalWrite(pinHeater, LOW);
-      delay(1000);
-      waitingTimer++;
-    } else {
-      digitalWrite(pinHeater, HIGH);
-      client.publish("mtcnxd/feeds/fridge_status", "Stop defrost");
-      setRunningTime();
-      defrost = false;
-    }
-  }
+  digitalWrite(pinHeater, LOW);
+  timerInMinutes(11);
+  client.publish("mtcnxd/feeds/fridge_status", "Stop defrost");
+  digitalWrite(pinHeater, HIGH);
+  setRunningTime();
 }
 
 void cooling(int temperature)
@@ -89,6 +78,7 @@ void timerInMinutes(int minutes)
   while (isWaiting) {
     int currentMinutes = getRunningMinutes();
     if (currentMinutes != previousMinutes) {
+      client.publish("mtcnxd/feeds/fridge_status", "Waiting");
       Serial.println("Waiting for: " + (String) minutesWaiting + " minutes");
       previousMinutes = currentMinutes;
       minutesWaiting ++;
