@@ -36,6 +36,7 @@ void makeDefrost()
 {
   bool defrost = true;
   int waitingTimer = 0;
+  client.publish("mtcnxd/feeds/fridge_status", "Start defrost");
 
   while (defrost) {
     if (waitingTimer <= sleepTime) {
@@ -45,6 +46,7 @@ void makeDefrost()
       waitingTimer++;
     } else {
       digitalWrite(pinHeater, HIGH);
+      client.publish("mtcnxd/feeds/fridge_status", "Stop defrost");
       setRunningTime();
       defrost = false;
     }
@@ -59,7 +61,7 @@ void cooling(int temperature)
 
   } else {
     digitalWrite(pinCompressor, HIGH);
-    timerInMinutes(10);
+    timerInMinutes(11);
   }
 
 }
@@ -103,14 +105,11 @@ void timerInMinutes(int minutes)
 void reconnect()
 {
   while (!client.connected()) {
-    Serial.println(mqttServer);
-
     if (client.connect(mqttClientId.c_str(), mqttUser, mqttPassword)) {
       Serial.println("connected to server");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
       delay(5000);
     }
   }

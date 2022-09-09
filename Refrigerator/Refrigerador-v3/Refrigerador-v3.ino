@@ -51,7 +51,7 @@ void loop()
       int runningMinutes = getRunningMinutes();
       if (runningMinutes != previousMinutes) {
         previousMinutes = runningMinutes;
-        snprintf (payload, 40, "%ld", currentTemperature);
+        snprintf (payload, 30, "%ld", currentTemperature);
         client.publish("mtcnxd/feeds/refrigerator", payload);
       }
 

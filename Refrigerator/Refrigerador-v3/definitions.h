@@ -22,4 +22,4 @@ const char* mqttUser   = "mtcnxd";
 const char* mqttPassword  = "f0dd74b723d90a2ca81a2fc6af57c5e0dc6982e4";
 const String mqttClientId = "mtc.nxd@gmail.com";
 
-char payload[40];
+char payload[30];
