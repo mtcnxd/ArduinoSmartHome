@@ -31,7 +31,6 @@ void loop()
   client.loop();
 
   unsigned long currentMillis = millis();
-
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     
@@ -45,8 +44,6 @@ void loop()
       makeDefrost();
 
     } else {
-      digitalWrite(pinHeater, HIGH);
-
       int currentTemperature = analogRead(A0);
       currentTemperature = map(currentTemperature, 0, 1024, 0, 255);
       cooling(currentTemperature);
@@ -54,7 +51,7 @@ void loop()
       int runningMinutes = getRunningMinutes();
       if (runningMinutes != previousMinutes) {
         previousMinutes = runningMinutes;
-        snprintf (payload, 50, "%ld", currentTemperature);
+        snprintf (payload, 40, "%ld", currentTemperature);
         client.publish("mtcnxd/feeds/refrigerator", payload);
       }
 

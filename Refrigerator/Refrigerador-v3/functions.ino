@@ -16,21 +16,10 @@ void initialSetup()
 void setRunningTime()
 {
   delay(1500);
-  Serial.println("Setting Time");
   RTC.setHourMode(CLOCK_H24);
   RTC.setDateTime("01-01-2022", "00:00:00");
   Serial.println("New Time Set");
   RTC.startClock();
-}
-
-
-void showRunningTime()
-{
-  Serial.print(RTC.getHours());
-  Serial.print(":");
-  Serial.print(RTC.getMinutes());
-  Serial.print(":");
-  Serial.println(RTC.getSeconds());
 }
 
 int getRunningHours()
@@ -46,58 +35,47 @@ int getRunningMinutes()
 void makeDefrost()
 {
   bool defrost = true;
-  int currentTime = 0;
+  int waitingTimer = 0;
 
-  if (currentTime <= defrostTime) {
-    while (defrost) {
-      Serial.println("Making defrost " + (String) currentTime + " seconds");
+  while (defrost) {
+    if (waitingTimer <= sleepTime) {
+      Serial.println("Defrosting for: " + (String) waitingTimer + " seconds");
       digitalWrite(pinHeater, LOW);
       digitalWrite(pinCompressor, HIGH);
       delay(1000);
-      currentTime++;
+      waitingTimer++;
+    } else {
+      digitalWrite(pinHeater, HIGH);
+      digitalWrite(pinCompressor, LOW);
+      setRunningTime();
+      defrost = false;
     }
-    defrost = false;
-
-  } else {
-    digitalWrite(pinHeater, HIGH);
-    digitalWrite(pinCompressor, LOW);
-    setRunningTime();
   }
-
 }
 
 void cooling(int temperature)
 {
   if (temperature >= configTemp) {
     digitalWrite(pinCompressor, LOW);
+    digitalWrite(pinHeater, HIGH);
     Serial.println("Current temperature: " + (String) temperature);
 
   } else {
     bool waiting = true;
-    int counter  = 0;
+    int waitingTimer  = 0;
 
     while (waiting) {
       digitalWrite(pinCompressor, HIGH);
-      if (counter < 660) {
-        Serial.println("Turn off compressor: " + (String) counter);
-        counter++;
+      if (waitingTimer <= sleepTime) {
+        Serial.println("Waiting for: " + (String) waitingTimer + " seconds");
         delay(1000);
+        waitingTimer++;
       } else {
         waiting = false;
       }
     }
   }
 
-}
-
-bool inArray(int currentHour, int vector[])
-{
-  for (int i = 0; i <= sizeof(vector); i++) {
-    if (currentHour == vector[i]) {
-      return true;
-    }
-  }
-  return false;
 }
 
 bool pushButtonPressed(bool pushButton)
