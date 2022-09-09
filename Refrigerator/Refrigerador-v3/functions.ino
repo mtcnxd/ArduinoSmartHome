@@ -11,8 +11,6 @@ void initialSetup()
   digitalWrite(pinHeater, HIGH);
   digitalWrite(pinCompressor, HIGH);
   Serial.begin(9600);
-  RTC.begin();
-  EEPROM.begin(512);
 }
 
 void setRunningTime()
@@ -20,9 +18,19 @@ void setRunningTime()
   delay(1500);
   Serial.println("Setting Time");
   RTC.setHourMode(CLOCK_H24);
-  RTC.setDateTime("01-01-2023", "00:00:00");
+  RTC.setDateTime("01-01-2022", "00:00:00");
   Serial.println("New Time Set");
   RTC.startClock();
+}
+
+
+void showRunningTime()
+{
+  Serial.print(RTC.getHours());
+  Serial.print(":");
+  Serial.print(RTC.getMinutes());
+  Serial.print(":");
+  Serial.println(RTC.getSeconds());
 }
 
 int getRunningHours()
@@ -53,24 +61,24 @@ void makeDefrost()
   } else {
     digitalWrite(pinHeater, HIGH);
     digitalWrite(pinCompressor, LOW);
+    setRunningTime();
   }
 
 }
 
 void cooling(int temperature)
 {
-  Serial.println("Current temperature: " + (String) temperature);
-
   if (temperature >= configTemp) {
     digitalWrite(pinCompressor, LOW);
+    Serial.println("Current temperature: " + (String) temperature);
 
   } else {
     bool waiting = true;
-    int counter = 0;
+    int counter  = 0;
 
     while (waiting) {
       digitalWrite(pinCompressor, HIGH);
-      if (counter < 600) {
+      if (counter < 660) {
         Serial.println("Turn off compressor: " + (String) counter);
         counter++;
         delay(1000);
@@ -79,12 +87,7 @@ void cooling(int temperature)
       }
     }
   }
-  
-}
 
-void saveTemperature(int addr, int val)
-{
-  EEPROM.write(addr, val);
 }
 
 bool inArray(int currentHour, int vector[])
@@ -115,7 +118,6 @@ bool pushButtonPressed(bool pushButton)
 void reconnect()
 {
   while (!client.connected()) {
-    Serial.print("Attempting MQTT connection: ");
     Serial.println(mqttServer);
 
     if (client.connect(mqttClientId.c_str(), mqttUser, mqttPassword)) {

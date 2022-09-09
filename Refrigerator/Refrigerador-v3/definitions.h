@@ -2,8 +2,8 @@
   VARS DEFINITIONS
 */
 int hoursToDefrost[] = {6, 12, 18, 23};
-int defrostTime   = 660; // seconds (11 mins)
-int configTemp    = 400; // ADC value
+int defrostTime   = 660; // Seconds (11 mins)
+int configTemp    = 124; // ADC (8 bits)
 
 bool isPushPressed = false;
 int minimunTemp = 15;

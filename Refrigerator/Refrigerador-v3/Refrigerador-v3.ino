@@ -6,7 +6,6 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 #include <PubSubClient.h>
-#include <EEPROM.h>
 #include <Wire.h>
 #include <RTC.h>
 
@@ -18,6 +17,7 @@ void setup()
 {
   WiFiManager wifiManager;
   wifiManager.autoConnect("LG_Fridge");
+  RTC.begin();
   initialSetup();
   client.setServer(mqttServer, 1883);
   setRunningTime();
@@ -34,22 +34,23 @@ void loop()
 
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-    bool pushButton = !digitalRead(pinPush);
-
-    if (!pushButtonPressed(pushButton)) {
+    
+    bool pushButton = digitalRead(pinPush);
+    if (pushButtonPressed(pushButton)) {
       Serial.println("Change Temperature");
     }
 
     int runningHours = getRunningHours();
-    if (inArray(runningHours, hoursToDefrost)) {
+    if (runningHours == 6) {
       makeDefrost();
 
     } else {
       digitalWrite(pinHeater, HIGH);
+
       int currentTemperature = analogRead(A0);
       currentTemperature = map(currentTemperature, 0, 1024, 0, 255);
       cooling(currentTemperature);
-
+      
       int runningMinutes = getRunningMinutes();
       if (runningMinutes != previousMinutes) {
         previousMinutes = runningMinutes;
