@@ -41,12 +41,10 @@ void makeDefrost()
     if (waitingTimer <= sleepTime) {
       Serial.println("Defrosting for: " + (String) waitingTimer + " seconds");
       digitalWrite(pinHeater, LOW);
-      digitalWrite(pinCompressor, HIGH);
       delay(1000);
       waitingTimer++;
     } else {
       digitalWrite(pinHeater, HIGH);
-      digitalWrite(pinCompressor, LOW);
       setRunningTime();
       defrost = false;
     }
@@ -57,23 +55,11 @@ void cooling(int temperature)
 {
   if (temperature >= configTemp) {
     digitalWrite(pinCompressor, LOW);
-    digitalWrite(pinHeater, HIGH);
     Serial.println("Current temperature: " + (String) temperature);
 
   } else {
-    bool waiting = true;
-    int waitingTimer  = 0;
-
-    while (waiting) {
-      digitalWrite(pinCompressor, HIGH);
-      if (waitingTimer <= sleepTime) {
-        Serial.println("Waiting for: " + (String) waitingTimer + " seconds");
-        delay(1000);
-        waitingTimer++;
-      } else {
-        waiting = false;
-      }
-    }
+    digitalWrite(pinCompressor, HIGH);
+    timerInMinutes(10);
   }
 
 }
@@ -91,6 +77,27 @@ bool pushButtonPressed(bool pushButton)
   }
 
   return buttonPressed;
+}
+
+void timerInMinutes(int minutes)
+{
+  bool isWaiting = true;
+  int minutesWaiting = 0;
+
+  while (isWaiting) {
+    int currentMinutes = getRunningMinutes();
+    if (currentMinutes != previousMinutes) {
+      Serial.println("Waiting for: " + (String) minutesWaiting + " minutes");
+      previousMinutes = currentMinutes;
+      minutesWaiting ++;
+
+    } else {
+      if (minutesWaiting == minutes) {
+        isWaiting = false;
+      }
+      delay(1000);
+    }
+  }
 }
 
 void reconnect()
