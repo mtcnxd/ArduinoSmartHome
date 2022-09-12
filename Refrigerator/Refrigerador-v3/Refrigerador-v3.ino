@@ -28,19 +28,13 @@ void loop()
   if (!client.connected()) {
     reconnect();
   }
-  client.loop();
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-    
-    bool pushButton = digitalRead(pinPush);
-    if (pushButtonPressed(pushButton)) {
-      Serial.println("Change Temperature");
-    }
 
     int runningHours = getRunningHours();
-    if (runningHours == 6) {
+    if (runningHours >= 6) {
       makeDefrost();
 
     } else {

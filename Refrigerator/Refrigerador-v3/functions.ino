@@ -34,10 +34,11 @@ int getRunningMinutes()
 
 void makeDefrost()
 {
-  client.publish("mtcnxd/feeds/fridge_status", "Start defrost");
+  client.publish("mtcnxd/feeds/refrigerator", "Defrosting");
+  Serial.println("Starting defrost");
   digitalWrite(pinHeater, LOW);
-  timerInMinutes(11);
-  client.publish("mtcnxd/feeds/fridge_status", "Stop defrost");
+  digitalWrite(pinCompressor, HIGH);
+  timerInMinutes(12);
   digitalWrite(pinHeater, HIGH);
   setRunningTime();
 }
@@ -49,8 +50,9 @@ void cooling(int temperature)
     Serial.println("Current temperature: " + (String) temperature);
 
   } else {
+    Serial.println("Turning off compressor");
     digitalWrite(pinCompressor, HIGH);
-    timerInMinutes(11);
+    timerInMinutes(12);
   }
 
 }
@@ -73,12 +75,11 @@ bool pushButtonPressed(bool pushButton)
 void timerInMinutes(int minutes)
 {
   bool isWaiting = true;
-  int minutesWaiting = 0;
+  int minutesWaiting = 1;
 
   while (isWaiting) {
     int currentMinutes = getRunningMinutes();
     if (currentMinutes != previousMinutes) {
-      client.publish("mtcnxd/feeds/fridge_status", "Waiting");
       Serial.println("Waiting for: " + (String) minutesWaiting + " minutes");
       previousMinutes = currentMinutes;
       minutesWaiting ++;
