@@ -22,19 +22,21 @@ void setup()
 {
   pinMode(pinButton, INPUT_PULLUP);
   Serial.begin(9600);
-  WiFiManager wifiManager;
-  wifiManager.autoConnect("LGFridge");
-  client.setServer(mqttServer, 1883);
+  //WiFiManager wifiManager;
+  //wifiManager.autoConnect("LGFridge");
+  //client.setServer(mqttServer, 1883);
   fridge.begin(pinDefrost, pinCompressor);
   setRunningTime();
 }
 
 void loop()
 {
+  /*
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
+  */
 
   showRunningTime();
 
