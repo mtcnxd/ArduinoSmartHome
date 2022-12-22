@@ -5,16 +5,19 @@
 
 class Incubator
 {
-    Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
+    Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
     Servo myservo;
     bool position = true;
     int pinHeater = 10;
+    int pinBuzzer = 16;
     int setPointTemperature = 38;
     int currentTemperature = 0;
+    int contador = 0;
 
   public :
     void begin() {
       myservo.attach(5);
+      pinMode(pinBuzzer, OUTPUT);
       display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
       display.clearDisplay();
     }
@@ -42,27 +45,42 @@ class Incubator
 
     }
 
+  private :
+    void beepTone() {
+      for (int i = 0; i <= 2; i++) {
+        digitalWrite(pinBuzzer, HIGH);
+        delay(200);
+        digitalWrite(pinBuzzer, LOW);
+        delay(200);
+      }
+    }
+
 
   private:
-    void showBitcoinPrice(float price) {
-      display.setTextSize(1);
+    void showCounter(int price) {
+      display.clearDisplay();
+      display.setTextSize(2);
       display.setTextColor(SSD1306_WHITE);
       display.setCursor(0, 0);
-      display.print("BITCOIN PRICE");
-      display.setTextSize(2);
-      display.setCursor(0, 10);
-      display.printf("$%.2f", price);
+      display.print(price);
       display.display();
     }
 
   public :
     void Run() {
       currentTemperature = this->getTemperature();
-      Serial.println("Current Temperature: " + (String) currentTemperature);
+      Serial.println("Current counter: " + (String) contador);
 
       if (currentTemperature < setPointTemperature) {
         digitalWrite(pinHeater, HIGH);
-        showBitcoinPrice(16912.20);
+
+        if (contador > 50) {
+          contador = 0;
+          beepTone();
+        } else {
+          showCounter(contador);
+          contador ++;
+        }
 
       } else {
         Serial.println("Waiting...");

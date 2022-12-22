@@ -1,7 +1,7 @@
 #include "incubator.h";
 
 unsigned long previousMillis = 0;
-const long interval = 1000;
+const long interval = 500;
 
 Incubator myIncubator;
 
