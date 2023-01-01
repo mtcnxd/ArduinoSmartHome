@@ -1,91 +1,120 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <Servo.h>
+#include <Adafruit_BMP085.h>
 
 class Incubator
 {
     Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
-    Servo myservo;
-    bool position = true;
+    Adafruit_BMP085 bmp;
+    int setPointTemperature = 30;
     int pinHeater = 10;
     int pinBuzzer = 16;
-    int setPointTemperature = 38;
-    int currentTemperature = 0;
-    int contador = 0;
+    int pinPush = 13;
+    int pinLed = 15;
+    int selectedMode = 1;
+    float currentValue = 0;    
+    bool pressed = false;
 
   public :
     void begin() {
-      myservo.attach(5);
+      bmp.begin();
       pinMode(pinBuzzer, OUTPUT);
+      pinMode(pinLed, OUTPUT);
+      pinMode(pinPush, INPUT_PULLUP);
       display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+      delay(500);
       display.clearDisplay();
     }
 
   private:
-    int getTemperature() {
-      currentTemperature = analogRead(A0);
-      return map(currentTemperature, 0, 1024, 0, 100);
+    float getTemperature() {
+      digitalWrite(pinLed, HIGH);
+      delay(10);
+      digitalWrite(pinLed, LOW);
+      return bmp.readTemperature();
     }
 
   private:
-    void moveServoMotor(bool position) {
-      if (position) {
-        for (int i = 0; i <= 180; i++) {
-          myservo.write(i);
-          delay(10);
-        }
+    float getAltitude() {
+      digitalWrite(pinLed, HIGH);
+      delay(10);
+      digitalWrite(pinLed, LOW);
+      return bmp.readAltitude();
+    }
 
-      } else {
-        for (int i = 180; i >= 0; i--) {
-          myservo.write(i);
-          delay(10);
-        }
-      }
-
+  private:
+    float getPressure() {
+      digitalWrite(pinLed, HIGH);
+      delay(10);
+      digitalWrite(pinLed, LOW);
+      return bmp.readPressure();
     }
 
   private :
     void beepTone() {
-      for (int i = 0; i <= 2; i++) {
-        digitalWrite(pinBuzzer, HIGH);
-        delay(200);
-        digitalWrite(pinBuzzer, LOW);
-        delay(200);
-      }
+      digitalWrite(pinBuzzer, HIGH);
+      delay(200);
+      digitalWrite(pinBuzzer, LOW);
     }
 
-
   private:
-    void showCounter(int price) {
+    void selectMode()
+    {
+      Serial.println("change Mode");
+      if (selectedMode >= 3) {
+        selectedMode = 1;
+      } else {
+        selectedMode++;
+      }
+      this->beepTone();
+    }
+
+  private :
+    void showDataDisplay(String title, float value)
+    {
       display.clearDisplay();
-      display.setTextSize(2);
+      display.setTextSize(1);
       display.setTextColor(SSD1306_WHITE);
-      display.setCursor(0, 0);
-      display.print(price);
+      display.setCursor(0, 5);
+      display.println(title);
+      display.setTextSize(2);
+      display.setCursor(0, 18);
+      display.printf("%.2f", value);
       display.display();
     }
 
+  public:
+    void RunButtons() {
+      bool pushButtonPressed = !digitalRead(pinPush);
+      delay(50);
+
+      if (pushButtonPressed && !pressed) {
+        this->selectMode();
+        pressed = true;
+      } else if (!pushButtonPressed && pressed) {
+        pressed = false;
+      }
+    }
+
   public :
-    void Run() {
-      currentTemperature = this->getTemperature();
-      Serial.println("Current counter: " + (String) contador);
+    void RunMain() {
+      if (selectedMode == 1) {
+        currentValue = this->getTemperature();
+        this->showDataDisplay("TEMPERATURE (C)", currentValue);
+        Serial.println("current Temperature: " + (String) currentValue);
+      }
 
-      if (currentTemperature < setPointTemperature) {
-        digitalWrite(pinHeater, HIGH);
+      if (selectedMode == 2) {
+        currentValue = this->getAltitude();
+        this->showDataDisplay("ALTITUDE (M)", currentValue);
+        Serial.println("current Altitude: " + (String) currentValue);
+      }
 
-        if (contador > 50) {
-          contador = 0;
-          beepTone();
-        } else {
-          showCounter(contador);
-          contador ++;
-        }
-
-      } else {
-        Serial.println("Waiting...");
-        digitalWrite(pinHeater, LOW);
-
+      if (selectedMode == 3) {
+        currentValue = this->getPressure();
+        this->showDataDisplay("PRESSURE (Pa)", currentValue);
+        Serial.println("current Pressure: " + (String) currentValue);
       }
 
     }

@@ -1,7 +1,7 @@
 #include "incubator.h";
 
 unsigned long previousMillis = 0;
-const long interval = 500;
+const long interval = 2500;
 
 Incubator myIncubator;
 
@@ -11,14 +11,15 @@ void setup()
   myIncubator.begin();
 }
 
-
 void loop()
 {
   unsigned long currentMillis = millis();
 
+  myIncubator.RunButtons();
+
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-    myIncubator.Run();
+    myIncubator.RunMain();
   }
 
 }
